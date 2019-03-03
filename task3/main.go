@@ -1,13 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
+	"flag"
 	"io"
 	"io/ioutil"
 	"os"
-	"fmt"
-	"flag"
-	"encoding/json"
-	"errors"
 )
 
 type User struct {
@@ -57,11 +56,6 @@ func Perform(args Arguments, writer io.Writer) error {
 			return errors.New("-id flag has to be specified")
 		}
 		err = remove(id, fileName)
-		if err != nil {
-			fmt.Println(err)
-			writer.Write([]byte(fmt.Sprint(err)))
-			return nil
-		}
 	case "findById":
 		var user User
 		id := args["id"]

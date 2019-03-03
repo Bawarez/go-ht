@@ -15,7 +15,7 @@ func Convert(arr []int) []string {
 	
 	for _, element := range arr{
 		switch {
-			case (element >= 0) && (element < 10) :
+			case (element >= 0) && (element < len(values)) :
 				result = append(result, values[element])
 			default:
 				result = append(result, "unknown")

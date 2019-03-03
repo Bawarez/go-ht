@@ -16,13 +16,7 @@ type User struct {
 	Age int `json:"age"`
 }
 
-type Arguments struct {
-	id string
-	operation string
-	item  string
-	fileName string
-}
-
+type Arguments map[string]string
 
 func main() {
 	err := Perform(parseArgs(), os.Stdout)
@@ -33,39 +27,58 @@ func main() {
 
 
 func Perform(args Arguments, writer io.Writer) error {
-	if args.operation == "" {
+	operation := args["operation"]
+	fileName := args["fileName"]
+
+	if operation == "" {
 		return errors.New("-operation flag has to be specified")
 	}
-	if args.fileName == "" {
+	if fileName == "" {
 		return errors.New("-fileName flag has to be specified")
 	}
 
 	var err error
 
-	switch args.operation {
+	switch operation {
 	case "add":
-		if args.item == "" {
+		item := args["item"]
+		if item == "" {
 			return errors.New("-item flag has to be specified")
 		}
-		err = add(args.item, args.fileName)
+		err = add(item, fileName)
 	case "list":
 		var users []User
-		users, err = list(args.fileName)
-		for _, user := range users {
-			fmt.Println(user)
-		}
+		users, err = list(fileName)
+		bytes, _ := json.Marshal(users)
+		writer.Write(bytes)
 	case "remove":
-		err = remove(args.id, args.fileName)
+		id := args["id"]
+		if id == "" {
+			return errors.New("-id flag has to be specified")
+		}
+		err = remove(id, fileName)
+		if err != nil {
+			fmt.Println(err)
+			writer.Write([]byte(fmt.Sprint(err)))
+			return nil
+		}
 	case "findById":
 		var user User
-		user, err = findById(args.id, args.fileName)
-		if user.Id != "" {
-			_, err = writer.Write([]byte(fmt.Sprint(user)))
-		} else {
-			_, err = writer.Write([]byte(""))
+		id := args["id"]
+		if id == "" {
+			return errors.New("-id flag has to be specified")
 		}
+		user, err = findById(id, fileName)
+
+		var bytes []byte
+		if user.Id != "" {
+			bytes, _ = json.Marshal(user)
+		} else {
+			bytes = []byte("")
+		}
+		writer.Write(bytes)
 	default:
-		return errors.New("Operation " + args.operation + " not allowed!")
+		return errors.New("Operation " + operation + " not allowed!")
 	}
 
 	return err
@@ -166,7 +179,6 @@ func remove(id string, fileName string) error {
 				newUsers = append(newUsers, user)
 			}
 		}
-
 		return saveUsers(newUsers, fileName)
 	}
 	return errors.New("Item with id " + id + " not found")

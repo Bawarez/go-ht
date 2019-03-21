@@ -94,7 +94,7 @@ func TestListOperation(t *testing.T) {
 	defer os.Remove(fileName)
 	checkError(t, err)
 
-	existingItems := "[{\"id\":\"1\",\"email\":\"test@test.com\",\"age\": 34},{\"id\":\"2\",\"email\":\"tes2@test.com\",\"age\":32}]"
+	existingItems := "[{\"id\":\"1\",\"email\":\"test@test.com\",\"age\":34},{\"id\":\"2\",\"email\":\"tes2@test.com\",\"age\":32}]"
 
 	file.Write([]byte(existingItems))
 	file.Close()
